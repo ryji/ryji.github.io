@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]> <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]> <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>High_order_function  &middot; ryji blogs</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<meta name="description" content="" />
+
+<meta name="keywords" content="">
+
+
+<meta property="og:title" content="High_order_function  &middot; ryji blogs ">
+<meta property="og:site_name" content="ryji blogs"/>
+<meta property="og:url" content="https://ryji.github.io/post/high_order_function/" />
+<meta property="og:locale" content="en-us">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:description" content=""/>
+<meta property="og:article:published_time" content="2018-02-13T15:57:47&#43;08:00" />
+<meta property="og:article:modified_time" content="2018-02-13T15:57:47&#43;08:00" />
+
+  
+
+  
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@" />
+<meta name="twitter:creator" content="@" />
+<meta name="twitter:title" content="High_order_function" />
+<meta name="twitter:description" content="" />
+<meta name="twitter:url" content="https://ryji.github.io/post/high_order_function/" />
+<meta name="twitter:domain" content="https://ryji.github.io/">
+  
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "headline": "High_order_function",
+    "author": {
+      "@type": "Person",
+      "name": "http://profiles.google.com/+?rel=author"
+    },
+    "datePublished": "2018-02-13",
+    "description": "",
+    "wordCount": 268
+  }
+</script>
+
+
+
+<link rel="canonical" href="https://ryji.github.io/post/high_order_function/" />
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://ryji.github.io/touch-icon-144-precomposed.png">
+<link href="https://ryji.github.io/favicon.png" rel="icon">
+
+<meta name="generator" content="Hugo 0.35" />
+
+  
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<link href='https://fonts.googleapis.com/css?family=Merriweather:300%7CRaleway%7COpen+Sans' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://ryji.github.io/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://ryji.github.io/css/style.css">
+
+
+  
+  
+</head>
+<body>
+  <main id="main-wrapper" class="container main_wrapper has-sidebar">
+    <header id="main-header" class="container main_header">
+  <div class="container brand">
+  <div class="container title h1-like">
+  <a class="baselink" href="https://ryji.github.io/">
+  ruoyang ji
+
+</a>
+
+</div>
+
+  
+<div class="container topline">
+  
+  <em>love coding</em>
+
+
+</div>
+
+
+</div>
+
+  <nav class="container nav primary no-print">
+  
+
+
+  
+
+</nav>
+
+<div class="container nav secondary no-print">
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+  
+
+</header>
+
+
+<article id="main-content" class="container main_content single">
+  <header class="container hat">
+  <h1>High_order_function
+</h1>
+
+  <div class="metas">
+<time datetime="2018-02-13">13 Feb, 2018</time>
+
+
+  
+  &middot; Read in about 2 min
+  &middot; (268 Words)
+  <br>
+  
+
+
+</div>
+
+</header>
+
+  <div class="container content">
+  
+
+<h3 id="abstract-high-order-function-in-csharp">Abstract High Order Function in CSharp</h3>
+
+<p>具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。</p>
+
+<h4 id="original">Original</h4>
+
+<p>如下面三个将字符串转化到其它类型的函数，其代码结构相似。</p>
+
+<pre><code class="language-Csharp">private int ConvertStr2Int(string s)
+{
+    if (string.IsNullOrEmpty(s)) return 0;
+    int res = 0;
+    if (int.TryParse(s, out res)) return res;
+    return 0;
+}
+
+private DateTime ConvertStr2Dt(string s)
+{
+    if (string.IsNullOrEmpty(s)) return DateTime.Now;
+    DateTime dt;
+    try
+    {
+        dt = Convert.ToDateTime(s);
+    }
+    catch (Exception e)
+    {
+        return DateTime.Now;
+    }
+    return dt;
+}
+
+private bool ConvertStr2Bool (string s)
+{
+    if (string.IsNullOrEmpty(s)) return false;
+    if (s.Equals(&quot;1&quot;)) return true;
+    return false;
+}
+</code></pre>
+
+<h5 id="problems">Problems</h5>
+
+<ul>
+<li>different empty value or exception value (add parameters?)</li>
+<li>need convert string to other types (write one more similar function?)</li>
+<li>different convert logic (how to name a similar function?)</li>
+<li>source type is not string (how to cover this?)</li>
+</ul>
+
+<h4 id="one-step-ahead">One step ahead</h4>
+
+<p>将其中相似的部分抽象出函数 <code>ConvertStr</code>，<code>string</code> 到不同数据类型的转换逻辑作为函数的参数。</p>
+
+<pre><code class="language-Csharp">private T ConvertStr&lt;T&gt;(string s, T emptyValue, T exceptValue, Func&lt;string, T&gt; converter)
+{
+    if (string.IsNullOrEmpty(s)) return emptyValue;
+    T res = exceptValue;
+    try
+    {
+        res = converter(s);
+    }
+    catch
+    {
+        return exceptValue;
+    }
+    return res;
+}
+</code></pre>
+
+<p>这样，以上三个字符串转换函数可以写为如下形式</p>
+
+<pre><code class="language-Csharp">private int ConvertStr2Int(string s)
+{
+    return ConvertStr&lt;int&gt;(s, 0, 0, (ss) =&gt; int.Parse(ss));
+}
+
+private DateTime ConvertStr2Dt(string s)
+{
+    return ConvertStr&lt;DateTime&gt;(s, DateTime.Now, DateTime.Now, (ss) =&gt; Convert.ToDateTime(ss));
+}
+
+private bool ConvertStr2Bool (string s)
+{
+    return ConvertStr&lt;bool&gt;(s, false, false, (ss) =&gt; ss.Equals(&quot;1&quot;));
+}
+</code></pre>
+
+<p>可以看出，原有的三个转换函数只是高阶函数部分参数化后的结果。</p>
+
+<h4 id="furthermore">Furthermore</h4>
+
+<p>以上高阶函数只能实现从 <code>string</code> 到其它类型的转换。 进一步，可以将 <code>string</code> 类型及其控制的判定抽象出来，创建从 <code>T1</code> 转换到 <code>T2</code> 的高阶函数 <code>MyConverter</code> 。同样，函数 <code>ConvertStr</code> 是 <code>MyConverter</code> 部分参数化的结果</p>
+
+<pre><code class="language-Csharp">private T2 MyConverter&lt;T1, T2&gt;(T1 s, Func&lt;T1, bool&gt;isEmpty,  T2 emptyValue, T2 exceptValue, Func&lt;T1, T2&gt; converter)
+{
+    if (isEmpty(s)) return emptyValue;
+    T2 res;
+    try
+    {
+        res = convert(s);
+    }
+    catch
+    {
+        return exceptValue;
+    }
+    return res;
+}
+
+private T ConvertStr&lt;T&gt;(string s, T emptyValue, T exceptValue,Func&lt;string, T&gt; converter)
+{
+    return MyConverter&lt;string, T&gt;(s, (ss) =&gt; string.IsNullOrEmpty(ss), emptyValue, exceptValue, converter);
+}
+</code></pre>
+
+</div>
+
+
+  <footer class="container">
+  <div class="container navigation no-print">
+  <h2>Navigation</h2>
+  
+  
+
+
+</div>
+
+  <div class="container comments">
+  <h2>Comments</h2>
+  
+
+</div>
+
+</footer>
+
+</article>
+      <footer id="main-footer" class="container main_footer">
+  
+
+  <div class="container nav foot no-print">
+  
+
+  <a class="toplink" href="#">back to top</a>
+
+</div>
+
+  <div class="container credits">
+  
+<div class="container footline">
+  
+  power by Hugo <i class='fa fa-heart'></i>
+
+
+</div>
+
+
+  
+
+</div>
+
+</footer>
+
+    </main>
+    
+
+
+
+    
+  </body>
+</html>
+
