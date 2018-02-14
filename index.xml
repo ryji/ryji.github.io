@@ -5,21 +5,19 @@
     <link>https://ryji.github.io/</link>
     <description>Recent content on ryji blogs</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>en</language>
     <lastBuildDate>Tue, 13 Feb 2018 15:57:47 +0800</lastBuildDate>
     
 	<atom:link href="https://ryji.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>High_order_function</title>
-      <link>https://ryji.github.io/post/high_order_function/</link>
+      <title>High order function in C#</title>
+      <link>https://ryji.github.io/post/high-order-function/</link>
       <pubDate>Tue, 13 Feb 2018 15:57:47 +0800</pubDate>
       
-      <guid>https://ryji.github.io/post/high_order_function/</guid>
-      <description>Abstract High Order Function in CSharp 具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。
-Original 如下面三个将字符串转化到其它类型的函数，其代码结构相似。
-private int ConvertStr2Int(string s) { if (string.IsNullOrEmpty(s)) return 0; int res = 0; if (int.TryParse(s, out res)) return res; return 0; } private DateTime ConvertStr2Dt(string s) { if (string.IsNullOrEmpty(s)) return DateTime.Now; DateTime dt; try { dt = Convert.ToDateTime(s); } catch (Exception e) { return DateTime.Now; } return dt; } private bool ConvertStr2Bool (string s) { if (string.IsNullOrEmpty(s)) return false; if (s.</description>
+      <guid>https://ryji.github.io/post/high-order-function/</guid>
+      <description>具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。 Original 如下面三个将字符串转化到其它类型的函数，其代码</description>
     </item>
     
   </channel>

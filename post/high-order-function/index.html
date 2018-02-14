@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>High order function in C# - ryji blogs</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="ruoyang ji" />
+  <meta name="description" content="具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。 Original 如下面三个将字符串转化到其它类型的函数，其代码" />
+
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.35" />
+
+
+<link rel="canonical" href="https://ryji.github.io/post/high-order-function/" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+<link href="/dist/even.min.css?v=3.0.0" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+
+
+<meta property="og:title" content="High order function in C#" />
+<meta property="og:description" content="具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。 Original 如下面三个将字符串转化到其它类型的函数，其代码" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ryji.github.io/post/high-order-function/" />
+
+
+
+<meta property="article:published_time" content="2018-02-13T15:57:47&#43;08:00"/>
+
+<meta property="article:modified_time" content="2018-02-13T15:57:47&#43;08:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="High order function in C#">
+<meta itemprop="description" content="具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。 Original 如下面三个将字符串转化到其它类型的函数，其代码">
+
+
+<meta itemprop="datePublished" content="2018-02-13T15:57:47&#43;08:00" />
+<meta itemprop="dateModified" content="2018-02-13T15:57:47&#43;08:00" />
+<meta itemprop="wordCount" content="484">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="High order function in C#"/>
+<meta name="twitter:description" content="具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。 Original 如下面三个将字符串转化到其它类型的函数，其代码"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">coding</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">coding</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">High order function in C#</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2018-02-13 </span>
+        
+        
+        
+      </div>
+    </header>
+
+    
+    
+<div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#original">Original</a>
+<ul>
+<li><a href="#problems">Problems</a></li>
+</ul></li>
+<li><a href="#one-step-ahead">One step ahead</a></li>
+<li><a href="#furthermore">Furthermore</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+
+    
+    <div class="post-content">
+      
+
+<p>具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。</p>
+
+<h4 id="original">Original</h4>
+
+<p>如下面三个将字符串转化到其它类型的函数，其代码结构相似。</p>
+
+<pre><code class="language-cs">private int ConvertStr2Int(string s)
+{
+    if (string.IsNullOrEmpty(s)) return 0;
+    int res = 0;
+    if (int.TryParse(s, out res)) return res;
+    return 0;
+}
+
+private DateTime ConvertStr2Dt(string s)
+{
+    if (string.IsNullOrEmpty(s)) return DateTime.Now;
+    DateTime dt;
+    try
+    {
+        dt = Convert.ToDateTime(s);
+    }
+    catch (Exception e)
+    {
+        return DateTime.Now;
+    }
+    return dt;
+}
+
+private bool ConvertStr2Bool (string s)
+{
+    if (string.IsNullOrEmpty(s)) return false;
+    if (s.Equals(&quot;1&quot;)) return true;
+    return false;
+}
+</code></pre>
+
+<h5 id="problems">Problems</h5>
+
+<ul>
+<li>different empty value or exception value (add parameters?)</li>
+<li>need convert string to other types (write one more similar function?)</li>
+<li>different convert logic (how to name a similar function?)</li>
+<li>source type is not string (how to cover this?)</li>
+</ul>
+
+<h4 id="one-step-ahead">One step ahead</h4>
+
+<p>将其中相似的部分抽象出函数 <code>ConvertStr</code>，<code>string</code> 到不同数据类型的转换逻辑作为函数的参数。</p>
+
+<pre><code class="language-cs">private T ConvertStr&lt;T&gt;(string s, T emptyValue, T exceptValue, Func&lt;string, T&gt; converter)
+{
+    if (string.IsNullOrEmpty(s)) return emptyValue;
+    T res = exceptValue;
+    try
+    {
+        res = converter(s);
+    }
+    catch
+    {
+        return exceptValue;
+    }
+    return res;
+}
+</code></pre>
+
+<p>这样，以上三个字符串转换函数可以写为如下形式</p>
+
+<pre><code class="language-cs">private int ConvertStr2Int(string s)
+{
+    return ConvertStr&lt;int&gt;(s, 0, 0, (ss) =&gt; int.Parse(ss));
+}
+
+private DateTime ConvertStr2Dt(string s)
+{
+    return ConvertStr&lt;DateTime&gt;(s, DateTime.Now, DateTime.Now, (ss) =&gt; Convert.ToDateTime(ss));
+}
+
+private bool ConvertStr2Bool (string s)
+{
+    return ConvertStr&lt;bool&gt;(s, false, false, (ss) =&gt; ss.Equals(&quot;1&quot;));
+}
+</code></pre>
+
+<p>可以看出，原有的三个转换函数只是高阶函数部分参数化后的结果。</p>
+
+<h4 id="furthermore">Furthermore</h4>
+
+<p>以上高阶函数只能实现从 <code>string</code> 到其它类型的转换。 进一步，可以将 <code>string</code> 类型及其控制的判定抽象出来，创建从 <code>T1</code> 转换到 <code>T2</code> 的高阶函数 <code>MyConverter</code> 。同样，函数 <code>ConvertStr</code> 是 <code>MyConverter</code> 部分参数化的结果</p>
+
+<pre><code class="language-CSharp">private T2 MyConverter&lt;T1, T2&gt;(T1 s, Func&lt;T1, bool&gt;isEmpty,  T2 emptyValue, T2 exceptValue, Func&lt;T1, T2&gt; converter)
+{
+    if (isEmpty(s)) return emptyValue;
+    T2 res;
+    try
+    {
+        res = convert(s);
+    }
+    catch
+    {
+        return exceptValue;
+    }
+    return res;
+}
+
+private T ConvertStr&lt;T&gt;(string s, T emptyValue, T exceptValue,Func&lt;string, T&gt; converter)
+{
+    return MyConverter&lt;string, T&gt;(s, (ss) =&gt; string.IsNullOrEmpty(ss), emptyValue, exceptValue, converter);
+}
+</code></pre>
+
+    </div>
+
+    
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">ruoyang ji</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">2018-02-13</span>
+  </p>
+  
+  
+</div>
+
+    
+    
+
+    <footer class="post-footer">
+      
+
+      
+      <nav class="post-nav">
+        
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+  
+
+  
+
+  
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:ruoyangji@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://localhost:1313" class="iconfont icon-github" title="github"></a>
+  <a href="https://ryji.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017 - 
+    2018
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">ruoyang ji</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script><script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=3.0.0"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

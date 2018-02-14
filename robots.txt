@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://ryji.github.io/sitemap.xml
