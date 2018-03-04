@@ -6,10 +6,19 @@
     <description>Recent content on ryji blogs</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 13 Feb 2018 15:57:47 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 05 Mar 2018 05:43:58 +0800</lastBuildDate>
     
 	<atom:link href="https://ryji.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Template in C#</title>
+      <link>https://ryji.github.io/post/template/</link>
+      <pubDate>Mon, 05 Mar 2018 05:43:58 +0800</pubDate>
+      
+      <guid>https://ryji.github.io/post/template/</guid>
+      <description>泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。.Net的System.Collections.Generic命</description>
+    </item>
     
     <item>
       <title>High order function in C#</title>
