@@ -22,10 +22,10 @@
     
     <item>
       <title>High order function in C#</title>
-      <link>https://ryji.github.io/post/high-order-function/</link>
+      <link>https://ryji.github.io/post/high_order_function/</link>
       <pubDate>Tue, 13 Feb 2018 15:57:47 +0800</pubDate>
       
-      <guid>https://ryji.github.io/post/high-order-function/</guid>
+      <guid>https://ryji.github.io/post/high_order_function/</guid>
       <description>具有相似功能的函数通常具有相似的结构，将相似的部分抽象出高阶函数，可以简化代码，提高复用率。 Original 如下面三个将字符串转化到其它类型的函数，其代码</description>
     </item>
     
