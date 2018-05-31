@@ -282,7 +282,7 @@ private bool ConvertStr2Bool (string s)
 
 <p>以上高阶函数只能实现从 <code>string</code> 到其它类型的转换。 进一步，可以将 <code>string</code> 类型及其控制的判定抽象出来，创建从 <code>T1</code> 转换到 <code>T2</code> 的高阶函数 <code>MyConverter</code> 。同样，函数 <code>ConvertStr</code> 是 <code>MyConverter</code> 部分参数化的结果</p>
 
-<pre><code class="language-CSharp">private T2 MyConverter&lt;T1, T2&gt;(T1 s, Func&lt;T1, bool&gt;isEmpty,  T2 emptyValue, T2 exceptValue, Func&lt;T1, T2&gt; converter)
+<pre><code class="language-cs">private T2 MyConverter&lt;T1, T2&gt;(T1 s, Func&lt;T1, bool&gt;isEmpty,  T2 emptyValue, T2 exceptValue, Func&lt;T1, T2&gt; converter)
 {
     if (isEmpty(s)) return emptyValue;
     T2 res;

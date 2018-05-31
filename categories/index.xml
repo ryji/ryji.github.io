@@ -6,7 +6,7 @@
     <description>Recent content in Categories on ryji blogs</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 05 Mar 2018 05:43:58 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 30 May 2018 23:29:51 +0800</lastBuildDate>
     
 	<atom:link href="https://ryji.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,9 +14,18 @@
     <item>
       <title>C#</title>
       <link>https://ryji.github.io/categories/c#/</link>
-      <pubDate>Mon, 05 Mar 2018 05:43:58 +0800</pubDate>
+      <pubDate>Wed, 30 May 2018 23:29:51 +0800</pubDate>
       
       <guid>https://ryji.github.io/categories/c#/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tree</title>
+      <link>https://ryji.github.io/categories/tree/</link>
+      <pubDate>Wed, 30 May 2018 23:29:51 +0800</pubDate>
+      
+      <guid>https://ryji.github.io/categories/tree/</guid>
       <description></description>
     </item>
     
