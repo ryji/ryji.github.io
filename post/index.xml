@@ -6,10 +6,19 @@
     <description>Recent content in Posts on ryji blogs</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 30 May 2018 23:29:51 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 02 Oct 2018 02:38:10 +0800</lastBuildDate>
     
 	<atom:link href="https://ryji.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Heap implement in C#</title>
+      <link>https://ryji.github.io/post/heap/</link>
+      <pubDate>Tue, 02 Oct 2018 02:38:10 +0800</pubDate>
+      
+      <guid>https://ryji.github.io/post/heap/</guid>
+      <description>堆结构是一种逻辑结构为完全二叉树的数据结构，且每一级的父节点和子节点均满足一定的大小关系，同级节点的大小关系不作要求。对于最大/最小元素的查</description>
+    </item>
     
     <item>
       <title>rebuildTree</title>

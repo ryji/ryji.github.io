@@ -3,6 +3,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://ryji.github.io/post/heap/</loc>
+    <lastmod>2018-10-02T02:38:10+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://ryji.github.io/post/rebuildtree/</loc>
     <lastmod>2018-05-30T23:29:51+08:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -25,21 +32,28 @@
   
   <url>
     <loc>https://ryji.github.io/categories/c#/</loc>
-    <lastmod>2018-05-30T23:29:51+08:00</lastmod>
+    <lastmod>2018-10-02T02:38:10+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://ryji.github.io/categories/</loc>
-    <lastmod>2018-05-30T23:29:51+08:00</lastmod>
+    <lastmod>2018-10-02T02:38:10+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://ryji.github.io/categories/date-structure/</loc>
+    <lastmod>2018-10-02T02:38:10+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://ryji.github.io/post/</loc>
-    <lastmod>2018-05-30T23:29:51+08:00</lastmod>
+    <lastmod>2018-10-02T02:38:10+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0</priority>
   </url>
@@ -59,7 +73,7 @@
   
   <url>
     <loc>https://ryji.github.io/</loc>
-    <lastmod>2018-05-30T23:29:51+08:00</lastmod>
+    <lastmod>2018-10-02T02:38:10+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0</priority>
   </url>
