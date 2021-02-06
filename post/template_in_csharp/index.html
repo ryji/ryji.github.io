@@ -1,99 +1,204 @@
-<!doctype html><html xmlns=http://www.w3.org/1999/xhtml xml:lang=en-us lang=en-us><head><link href=https://gmpg.org/xfn/11 rel=profile><meta charset=utf-8><meta name=generator content="Hugo 0.79.1"><meta name=viewport content="width=device-width,initial-scale=1"><title>Template in C# &#183; My New Hugo Site</title><meta name=description content><link type=text/css rel=stylesheet href=http://example.org/css/print.css media=print><link type=text/css rel=stylesheet href=http://example.org/css/poole.css><link type=text/css rel=stylesheet href=http://example.org/css/syntax.css><link type=text/css rel=stylesheet href=http://example.org/css/hyde.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700"><link rel=apple-touch-icon-precomposed sizes=144x144 href=/apple-touch-icon-144-precomposed.png><link rel="shortcut icon" href=/favicon.png></head><body><aside class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=http://example.org/><h1>My New Hugo Site</h1></a><p class=lead>An elegant open source and mobile first theme for <a href=http://hugo.spf13.com>hugo</a> made by <a href=http://twitter.com/mdo>@mdo</a>. Originally made for Jekyll.</p></div><nav><ul class=sidebar-nav><li><a href=http://example.org/>Home</a></li></ul></nav><p>&copy; 2021. All rights reserved.</p></div></aside><main class="content container"><div class=post><h1>Template in C#</h1><time datetime=2018-03-05T05:43:58+0800 class=post-date>Mon, Mar 5, 2018</time><p>泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。
-<code>.Net</code>的<code>System.Collections.Generic</code>命名空间中定义的大多数类型使用了泛型技术，比如<code>List&lt;T></code>，<code>Stack&lt;T></code>，<code>Tuple&lt;T1, T2, T3, ...></code>，<code>SortedList&lt;TKey, TValue></code>等，另外，委托类型也提供了泛型委托<code>Action</code>和<code>Function</code>。泛型接口定义了一种参数化类型的接口，保障程序的类型安全。</p><h4 id=泛型树节点接口>泛型树节点接口</h4><p>以树的遍历为例，不管树节点的类型和实现是什么，只要知道当前节点的深度和其子节点，就可以进行树的遍历。因此，定义泛型树节点接口<code>ITreeNode&lt;T></code>。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>interface</span> ITreeNode&lt;T&gt; <span style=color:#66d9ef>where</span> T : <span style=color:#66d9ef>class</span>
-{
-    <span style=color:#66d9ef>int</span> Depth { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; } <span style=color:#75715e>//深度
-</span><span style=color:#75715e></span>    List&lt;T&gt; GetChildren();	<span style=color:#75715e>//获取子节点
-</span><span style=color:#75715e></span>}
-</code></pre></div><h4 id=泛型树的约束>泛型树的约束</h4><p>在泛型树的定义中添加约束<code>class</code>和<code>ITreeNode&lt;T></code>，这样，在编译期就可以确保类型安全，用未实现<code>ITreeNode&lt;T></code>接口的<code>class</code>来实例化<code>Tree&lt;T></code>时会编译出错。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Tree</span>&lt;T&gt; <span style=color:#66d9ef>where</span> T : class, ITreeNode&lt;T&gt;
-{
-    <span style=color:#75715e>//树根
-</span><span style=color:#75715e></span>    <span style=color:#66d9ef>public</span> T Root { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
-    <span style=color:#75715e>//最大深度
-</span><span style=color:#75715e></span>    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> MaxDepth { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Template in C# - Even - A super concise theme for Hugo</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="olOwOlo"><meta name=description content="泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。 .Net的System.Collections.Generic命"><meta name=keywords content="Hugo,theme,even"><meta name=generator content="Hugo 0.79.1 with theme even"><link rel=canonical href=http://localhost:1313/post/template_in_csharp/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.2e81bbed97b8b282c1aeb57488cc71c8d8c8ec559f3931531bd396bf31e0d4dd.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Template in C#"><meta property="og:description" content="泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。 .Net的System.Collections.Generic命"><meta property="og:type" content="article"><meta property="og:url" content="http://localhost:1313/post/template_in_csharp/"><meta property="article:published_time" content="2018-03-05T05:43:58+08:00"><meta property="article:modified_time" content="2018-03-05T05:43:58+08:00"><meta itemprop=name content="Template in C#"><meta itemprop=description content="泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。 .Net的System.Collections.Generic命"><meta itemprop=datePublished content="2018-03-05T05:43:58+08:00"><meta itemprop=dateModified content="2018-03-05T05:43:58+08:00"><meta itemprop=wordCount content="1011"><meta itemprop=keywords content><meta name=twitter:card content="summary"><meta name=twitter:title content="Template in C#"><meta name=twitter:description content="泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。 .Net的System.Collections.Generic命"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Even</a></div><div class=mobile-navbar-icon><span></span><span></span><span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Even</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Template in C#</h1><div class=post-meta><span class=post-time>2018-03-05</span><div class=post-category><a href=/categories/c/>C#</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><ul><li><ul><li></li></ul></li></ul></li></ul></nav></div></div><div class=post-content><p>泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。
+<code>.Net</code>的<code>System.Collections.Generic</code>命名空间中定义的大多数类型使用了泛型技术，比如<code>List&lt;T></code>，<code>Stack&lt;T></code>，<code>Tuple&lt;T1, T2, T3, ...></code>，<code>SortedList&lt;TKey, TValue></code>等，另外，委托类型也提供了泛型委托<code>Action</code>和<code>Function</code>。泛型接口定义了一种参数化类型的接口，保障程序的类型安全。</p><h4 id=泛型树节点接口>泛型树节点接口</h4><p>以树的遍历为例，不管树节点的类型和实现是什么，只要知道当前节点的深度和其子节点，就可以进行树的遍历。因此，定义泛型树节点接口<code>ITreeNode&lt;T></code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-cs data-lang=cs><span class=k>public</span> <span class=k>interface</span> <span class=n>ITreeNode</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;</span> <span class=k>where</span> <span class=n>T</span> <span class=p>:</span> <span class=k>class</span>
+<span class=p>{</span>
+    <span class=kt>int</span> <span class=n>Depth</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span> <span class=c1>//深度
+</span><span class=c1></span>    <span class=n>List</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;</span> <span class=n>GetChildren</span><span class=p>();</span>	<span class=c1>//获取子节点
+</span><span class=c1></span><span class=p>}</span>
+</code></pre></td></tr></table></div></div><h4 id=泛型树的约束>泛型树的约束</h4><p>在泛型树的定义中添加约束<code>class</code>和<code>ITreeNode&lt;T></code>，这样，在编译期就可以确保类型安全，用未实现<code>ITreeNode&lt;T></code>接口的<code>class</code>来实例化<code>Tree&lt;T></code>时会编译出错。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-cs data-lang=cs><span class=k>public</span> <span class=k>class</span> <span class=nc>Tree</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;</span> <span class=k>where</span> <span class=n>T</span> <span class=p>:</span> <span class=n>class</span><span class=p>,</span> <span class=n>ITreeNode</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;</span>
+<span class=p>{</span>
+    <span class=c1>//树根
+</span><span class=c1></span>    <span class=k>public</span> <span class=n>T</span> <span class=n>Root</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
+    <span class=c1>//最大深度
+</span><span class=c1></span>    <span class=k>public</span> <span class=kt>int</span> <span class=n>MaxDepth</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
 
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> Travel()
-    {
-        Travel(Root, MaxDepth);
-    }
+    <span class=k>public</span> <span class=k>void</span> <span class=n>Travel</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=n>Travel</span><span class=p>(</span><span class=n>Root</span><span class=p>,</span> <span class=n>MaxDepth</span><span class=p>);</span>
+    <span class=p>}</span>
 
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> Travel(<span style=color:#66d9ef>int</span> maxDepth)
-    {
-        Debug.Assert(maxDepth &gt;= <span style=color:#ae81ff>0</span>);
-        Travel(Root, Math.Min(maxDepth, MaxDepth));
-    }
+    <span class=k>public</span> <span class=k>void</span> <span class=n>Travel</span><span class=p>(</span><span class=kt>int</span> <span class=n>maxDepth</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=n>Debug</span><span class=p>.</span><span class=n>Assert</span><span class=p>(</span><span class=n>maxDepth</span> <span class=p>&gt;=</span> <span class=m>0</span><span class=p>);</span>
+        <span class=n>Travel</span><span class=p>(</span><span class=n>Root</span><span class=p>,</span> <span class=n>Math</span><span class=p>.</span><span class=n>Min</span><span class=p>(</span><span class=n>maxDepth</span><span class=p>,</span> <span class=n>MaxDepth</span><span class=p>));</span>
+    <span class=p>}</span>
 
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> Travel(T parentNode, <span style=color:#66d9ef>int</span> maxDepth)
-    {
-        Debug.Assert(maxDepth &lt;= MaxDepth, <span style=color:#e6db74>&#34;maxdepth cannot be larger than tree Maxdepth&#34;</span>);
-        <span style=color:#66d9ef>if</span> (parentNode.Depth &gt; maxDepth) <span style=color:#66d9ef>return</span>;
-        Console.WriteLine(parentNode.ToString());
-        <span style=color:#66d9ef>var</span> children = parentNode.GetChildren();
-        <span style=color:#66d9ef>if</span> (children == <span style=color:#66d9ef>null</span>) <span style=color:#66d9ef>return</span>;
-        <span style=color:#66d9ef>foreach</span> (<span style=color:#66d9ef>var</span> child <span style=color:#66d9ef>in</span> children)
-        {
-            Travel(child, maxDepth);
-        }
-    }
-}
-</code></pre></div><h4 id=treenode实现>TreeNode实现</h4><p><code>MyTreeNode</code>实现了接口，通过静态属性<code>GetChildrenFunc</code>，具体的<code>GetChildren</code>可以由用户实现。若用户未定义<code>GetChildren</code>，则程序抛出异常。<code>GetChildrenFunc</code>也是通过泛型来确保编译期的类型安全。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MyTreeNode</span> : ITreeNode&lt;MyTreeNode&gt;
-{
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> Content { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> Func&lt;MyTreeNode, List&lt;MyTreeNode&gt;&gt; GetChildrenFunc { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+    <span class=k>public</span> <span class=k>void</span> <span class=n>Travel</span><span class=p>(</span><span class=n>T</span> <span class=n>parentNode</span><span class=p>,</span> <span class=kt>int</span> <span class=n>maxDepth</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=n>Debug</span><span class=p>.</span><span class=n>Assert</span><span class=p>(</span><span class=n>maxDepth</span> <span class=p>&lt;=</span> <span class=n>MaxDepth</span><span class=p>,</span> <span class=s>&#34;maxdepth cannot be larger than tree Maxdepth&#34;</span><span class=p>);</span>
+        <span class=k>if</span> <span class=p>(</span><span class=n>parentNode</span><span class=p>.</span><span class=n>Depth</span> <span class=p>&gt;</span> <span class=n>maxDepth</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+        <span class=n>Console</span><span class=p>.</span><span class=n>WriteLine</span><span class=p>(</span><span class=n>parentNode</span><span class=p>.</span><span class=n>ToString</span><span class=p>());</span>
+        <span class=kt>var</span> <span class=n>children</span> <span class=p>=</span> <span class=n>parentNode</span><span class=p>.</span><span class=n>GetChildren</span><span class=p>();</span>
+        <span class=k>if</span> <span class=p>(</span><span class=n>children</span> <span class=p>==</span> <span class=k>null</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+        <span class=k>foreach</span> <span class=p>(</span><span class=kt>var</span> <span class=n>child</span> <span class=k>in</span> <span class=n>children</span><span class=p>)</span>
+        <span class=p>{</span>
+            <span class=n>Travel</span><span class=p>(</span><span class=n>child</span><span class=p>,</span> <span class=n>maxDepth</span><span class=p>);</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h4 id=treenode实现>TreeNode实现</h4><p><code>MyTreeNode</code>实现了接口，通过静态属性<code>GetChildrenFunc</code>，具体的<code>GetChildren</code>可以由用户实现。若用户未定义<code>GetChildren</code>，则程序抛出异常。<code>GetChildrenFunc</code>也是通过泛型来确保编译期的类型安全。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-cs data-lang=cs><span class=k>public</span> <span class=k>class</span> <span class=nc>MyTreeNode</span> <span class=p>:</span> <span class=n>ITreeNode</span><span class=p>&lt;</span><span class=n>MyTreeNode</span><span class=p>&gt;</span>
+<span class=p>{</span>
+    <span class=k>public</span> <span class=kt>int</span> <span class=n>Content</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
+    <span class=k>public</span> <span class=k>static</span> <span class=n>Func</span><span class=p>&lt;</span><span class=n>MyTreeNode</span><span class=p>,</span> <span class=n>List</span><span class=p>&lt;</span><span class=n>MyTreeNode</span><span class=p>&gt;&gt;</span> <span class=n>GetChildrenFunc</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
 
-    <span style=color:#75715e>#region constructor
-</span><span style=color:#75715e></span>
-    <span style=color:#66d9ef>public</span> MyTreeNode(<span style=color:#66d9ef>int</span> content = <span style=color:#ae81ff>0</span>, <span style=color:#66d9ef>int</span> depth = <span style=color:#ae81ff>1</span>)
-    {
-        Content = content;
-        Depth = depth;
-    }
+    <span class=cp>#region constructor
+</span><span class=cp></span>
+    <span class=k>public</span> <span class=n>MyTreeNode</span><span class=p>(</span><span class=kt>int</span> <span class=n>content</span> <span class=p>=</span> <span class=m>0</span><span class=p>,</span> <span class=kt>int</span> <span class=n>depth</span> <span class=p>=</span> <span class=m>1</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=n>Content</span> <span class=p>=</span> <span class=n>content</span><span class=p>;</span>
+        <span class=n>Depth</span> <span class=p>=</span> <span class=n>depth</span><span class=p>;</span>
+    <span class=p>}</span>
 
-    <span style=color:#75715e>#endregion
-</span><span style=color:#75715e></span>
-    <span style=color:#75715e>#region field in interface
-</span><span style=color:#75715e></span>
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> Depth { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+    <span class=cp>#endregion
+</span><span class=cp></span>
+    <span class=cp>#region field in interface
+</span><span class=cp></span>
+    <span class=k>public</span> <span class=kt>int</span> <span class=n>Depth</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
 
-    <span style=color:#66d9ef>public</span> List&lt;MyTreeNode&gt; GetChildren()
-    {
-        <span style=color:#66d9ef>if</span> (GetChildrenFunc != <span style=color:#66d9ef>null</span>)
-        {
-            <span style=color:#66d9ef>return</span> GetChildrenFunc(<span style=color:#66d9ef>this</span>);
-        }
-        <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> NotImplementedException(<span style=color:#e6db74>&#34;GetChildrenFunc&#34;</span>);
-    }
+    <span class=k>public</span> <span class=n>List</span><span class=p>&lt;</span><span class=n>MyTreeNode</span><span class=p>&gt;</span> <span class=n>GetChildren</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=k>if</span> <span class=p>(</span><span class=n>GetChildrenFunc</span> <span class=p>!=</span> <span class=k>null</span><span class=p>)</span>
+        <span class=p>{</span>
+            <span class=k>return</span> <span class=n>GetChildrenFunc</span><span class=p>(</span><span class=k>this</span><span class=p>);</span>
+        <span class=p>}</span>
+        <span class=k>throw</span> <span class=k>new</span> <span class=n>NotImplementedException</span><span class=p>(</span><span class=s>&#34;GetChildrenFunc&#34;</span><span class=p>);</span>
+    <span class=p>}</span>
 
-    <span style=color:#75715e>#endregion
-</span><span style=color:#75715e></span>
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>string</span> ToString()
-    {
-        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;depth is {0}, content is {1}&#34;</span>, Depth.ToString(), Content.ToString());
-    }
-}
+    <span class=cp>#endregion
+</span><span class=cp></span>
+    <span class=k>public</span> <span class=k>override</span> <span class=kt>string</span> <span class=n>ToString</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=k>return</span> <span class=kt>string</span><span class=p>.</span><span class=n>Format</span><span class=p>(</span><span class=s>&#34;depth is {0}, content is {1}&#34;</span><span class=p>,</span> <span class=n>Depth</span><span class=p>.</span><span class=n>ToString</span><span class=p>(),</span> <span class=n>Content</span><span class=p>.</span><span class=n>ToString</span><span class=p>());</span>
+    <span class=p>}</span>
+<span class=p>}</span>
 
-<span style=color:#75715e>//未实现接口，测试编译期类型安全
-</span><span style=color:#75715e></span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MyTreeNode2</span>
-{
+<span class=c1>//未实现接口，测试编译期类型安全
+</span><span class=c1></span><span class=k>public</span> <span class=k>class</span> <span class=nc>MyTreeNode2</span>
+<span class=p>{</span>
 
-}
-</code></pre></div><h4 id=测试代码>测试代码</h4><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>TestTree</span>
-{
-    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> Test()
-    {
-        <span style=color:#75715e>//无GetChildrenFunc的实现时，运行时抛出NotImplementedException
-</span><span style=color:#75715e></span>        MyTreeNode.GetChildrenFunc = (node =&gt; <span style=color:#66d9ef>new</span> List&lt;MyTreeNode&gt;()
-        {
-            <span style=color:#66d9ef>new</span> MyTreeNode(node.Content*<span style=color:#ae81ff>2</span>, node.Depth + <span style=color:#ae81ff>1</span>),
-            <span style=color:#66d9ef>new</span> MyTreeNode(node.Content*<span style=color:#ae81ff>2</span> + <span style=color:#ae81ff>1</span>, node.Depth + <span style=color:#ae81ff>1</span>)
-        });
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h4 id=测试代码>测试代码</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-cs data-lang=cs><span class=k>public</span> <span class=k>class</span> <span class=nc>TestTree</span>
+<span class=p>{</span>
+    <span class=k>public</span> <span class=k>static</span> <span class=k>void</span> <span class=n>Test</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=c1>//无GetChildrenFunc的实现时，运行时抛出NotImplementedException
+</span><span class=c1></span>        <span class=n>MyTreeNode</span><span class=p>.</span><span class=n>GetChildrenFunc</span> <span class=p>=</span> <span class=p>(</span><span class=n>node</span> <span class=p>=&gt;</span> <span class=k>new</span> <span class=n>List</span><span class=p>&lt;</span><span class=n>MyTreeNode</span><span class=p>&gt;()</span>
+        <span class=p>{</span>
+            <span class=k>new</span> <span class=n>MyTreeNode</span><span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>Content</span><span class=p>*</span><span class=m>2</span><span class=p>,</span> <span class=n>node</span><span class=p>.</span><span class=n>Depth</span> <span class=p>+</span> <span class=m>1</span><span class=p>),</span>
+            <span class=k>new</span> <span class=n>MyTreeNode</span><span class=p>(</span><span class=n>node</span><span class=p>.</span><span class=n>Content</span><span class=p>*</span><span class=m>2</span> <span class=p>+</span> <span class=m>1</span><span class=p>,</span> <span class=n>node</span><span class=p>.</span><span class=n>Depth</span> <span class=p>+</span> <span class=m>1</span><span class=p>)</span>
+        <span class=p>});</span>
 
 
-        <span style=color:#66d9ef>var</span> tree1 = <span style=color:#66d9ef>new</span> Tree&lt;MyTreeNode&gt;() { Root = <span style=color:#66d9ef>new</span> MyTreeNode(<span style=color:#ae81ff>1</span>), MaxDepth = <span style=color:#ae81ff>3</span> };
-        tree1.Travel();
+        <span class=kt>var</span> <span class=n>tree1</span> <span class=p>=</span> <span class=k>new</span> <span class=n>Tree</span><span class=p>&lt;</span><span class=n>MyTreeNode</span><span class=p>&gt;()</span> <span class=p>{</span> <span class=n>Root</span> <span class=p>=</span> <span class=k>new</span> <span class=n>MyTreeNode</span><span class=p>(</span><span class=m>1</span><span class=p>),</span> <span class=n>MaxDepth</span> <span class=p>=</span> <span class=m>3</span> <span class=p>};</span>
+        <span class=n>tree1</span><span class=p>.</span><span class=n>Travel</span><span class=p>();</span>
 
-        <span style=color:#75715e>//未注释时，无法通过编译
-</span><span style=color:#75715e></span>        <span style=color:#75715e>//var tree2 = new Tree&lt;MyTreeNode2&gt;();
-</span><span style=color:#75715e></span>
-    }
-}
-</code></pre></div></div></main></body></html>
+        <span class=c1>//未注释时，无法通过编译
+</span><span class=c1></span>        <span class=c1>//var tree2 = new Tree&lt;MyTreeNode2&gt;();
+</span><span class=c1></span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>olOwOlo</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2018-03-05</span></p></div><footer class=post-footer><nav class=post-nav></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:your@email.com class="iconfont icon-email" title=email></a><a href=http://localhost:1313 class="iconfont icon-stack-overflow" title=stack-overflow></a><a href=http://localhost:1313 class="iconfont icon-twitter" title=twitter></a><a href=http://localhost:1313 class="iconfont icon-facebook" title=facebook></a><a href=http://localhost:1313 class="iconfont icon-linkedin" title=linkedin></a><a href=http://localhost:1313 class="iconfont icon-google" title=google></a><a href=http://localhost:1313 class="iconfont icon-github" title=github></a><a href=http://localhost:1313 class="iconfont icon-weibo" title=weibo></a><a href=http://localhost:1313 class="iconfont icon-zhihu" title=zhihu></a><a href=http://localhost:1313 class="iconfont icon-douban" title=douban></a><a href=http://localhost:1313 class="iconfont icon-pocket" title=pocket></a><a href=http://localhost:1313 class="iconfont icon-tumblr" title=tumblr></a><a href=http://localhost:1313 class="iconfont icon-instagram" title=instagram></a><a href=http://localhost:1313 class="iconfont icon-gitlab" title=gitlab></a><a href=http://localhost:1313 class="iconfont icon-bilibili" title=bilibili></a><a href=http://localhost:1313/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a></span>
+<span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2017 -
+2021<span class=heart><i class="iconfont icon-heart"></i></span><span>olOwOlo</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js></script></body></html>
