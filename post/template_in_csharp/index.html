@@ -1,0 +1,99 @@
+<!doctype html><html xmlns=http://www.w3.org/1999/xhtml xml:lang=en-us lang=en-us><head><link href=https://gmpg.org/xfn/11 rel=profile><meta charset=utf-8><meta name=generator content="Hugo 0.79.1"><meta name=viewport content="width=device-width,initial-scale=1"><title>Template in C# &#183; My New Hugo Site</title><meta name=description content><link type=text/css rel=stylesheet href=http://example.org/css/print.css media=print><link type=text/css rel=stylesheet href=http://example.org/css/poole.css><link type=text/css rel=stylesheet href=http://example.org/css/syntax.css><link type=text/css rel=stylesheet href=http://example.org/css/hyde.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700"><link rel=apple-touch-icon-precomposed sizes=144x144 href=/apple-touch-icon-144-precomposed.png><link rel="shortcut icon" href=/favicon.png></head><body><aside class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=http://example.org/><h1>My New Hugo Site</h1></a><p class=lead>An elegant open source and mobile first theme for <a href=http://hugo.spf13.com>hugo</a> made by <a href=http://twitter.com/mdo>@mdo</a>. Originally made for Jekyll.</p></div><nav><ul class=sidebar-nav><li><a href=http://example.org/>Home</a></li></ul></nav><p>&copy; 2021. All rights reserved.</p></div></aside><main class="content container"><div class=post><h1>Template in C#</h1><time datetime=2018-03-05T05:43:58+0800 class=post-date>Mon, Mar 5, 2018</time><p>泛型（参数化类型），将程序逻辑从具体的类型中分离出来，从而提高代码的复用性。
+<code>.Net</code>的<code>System.Collections.Generic</code>命名空间中定义的大多数类型使用了泛型技术，比如<code>List&lt;T></code>，<code>Stack&lt;T></code>，<code>Tuple&lt;T1, T2, T3, ...></code>，<code>SortedList&lt;TKey, TValue></code>等，另外，委托类型也提供了泛型委托<code>Action</code>和<code>Function</code>。泛型接口定义了一种参数化类型的接口，保障程序的类型安全。</p><h4 id=泛型树节点接口>泛型树节点接口</h4><p>以树的遍历为例，不管树节点的类型和实现是什么，只要知道当前节点的深度和其子节点，就可以进行树的遍历。因此，定义泛型树节点接口<code>ITreeNode&lt;T></code>。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>interface</span> ITreeNode&lt;T&gt; <span style=color:#66d9ef>where</span> T : <span style=color:#66d9ef>class</span>
+{
+    <span style=color:#66d9ef>int</span> Depth { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; } <span style=color:#75715e>//深度
+</span><span style=color:#75715e></span>    List&lt;T&gt; GetChildren();	<span style=color:#75715e>//获取子节点
+</span><span style=color:#75715e></span>}
+</code></pre></div><h4 id=泛型树的约束>泛型树的约束</h4><p>在泛型树的定义中添加约束<code>class</code>和<code>ITreeNode&lt;T></code>，这样，在编译期就可以确保类型安全，用未实现<code>ITreeNode&lt;T></code>接口的<code>class</code>来实例化<code>Tree&lt;T></code>时会编译出错。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Tree</span>&lt;T&gt; <span style=color:#66d9ef>where</span> T : class, ITreeNode&lt;T&gt;
+{
+    <span style=color:#75715e>//树根
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>public</span> T Root { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+    <span style=color:#75715e>//最大深度
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> MaxDepth { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> Travel()
+    {
+        Travel(Root, MaxDepth);
+    }
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> Travel(<span style=color:#66d9ef>int</span> maxDepth)
+    {
+        Debug.Assert(maxDepth &gt;= <span style=color:#ae81ff>0</span>);
+        Travel(Root, Math.Min(maxDepth, MaxDepth));
+    }
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> Travel(T parentNode, <span style=color:#66d9ef>int</span> maxDepth)
+    {
+        Debug.Assert(maxDepth &lt;= MaxDepth, <span style=color:#e6db74>&#34;maxdepth cannot be larger than tree Maxdepth&#34;</span>);
+        <span style=color:#66d9ef>if</span> (parentNode.Depth &gt; maxDepth) <span style=color:#66d9ef>return</span>;
+        Console.WriteLine(parentNode.ToString());
+        <span style=color:#66d9ef>var</span> children = parentNode.GetChildren();
+        <span style=color:#66d9ef>if</span> (children == <span style=color:#66d9ef>null</span>) <span style=color:#66d9ef>return</span>;
+        <span style=color:#66d9ef>foreach</span> (<span style=color:#66d9ef>var</span> child <span style=color:#66d9ef>in</span> children)
+        {
+            Travel(child, maxDepth);
+        }
+    }
+}
+</code></pre></div><h4 id=treenode实现>TreeNode实现</h4><p><code>MyTreeNode</code>实现了接口，通过静态属性<code>GetChildrenFunc</code>，具体的<code>GetChildren</code>可以由用户实现。若用户未定义<code>GetChildren</code>，则程序抛出异常。<code>GetChildrenFunc</code>也是通过泛型来确保编译期的类型安全。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MyTreeNode</span> : ITreeNode&lt;MyTreeNode&gt;
+{
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> Content { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> Func&lt;MyTreeNode, List&lt;MyTreeNode&gt;&gt; GetChildrenFunc { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+
+    <span style=color:#75715e>#region constructor
+</span><span style=color:#75715e></span>
+    <span style=color:#66d9ef>public</span> MyTreeNode(<span style=color:#66d9ef>int</span> content = <span style=color:#ae81ff>0</span>, <span style=color:#66d9ef>int</span> depth = <span style=color:#ae81ff>1</span>)
+    {
+        Content = content;
+        Depth = depth;
+    }
+
+    <span style=color:#75715e>#endregion
+</span><span style=color:#75715e></span>
+    <span style=color:#75715e>#region field in interface
+</span><span style=color:#75715e></span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> Depth { <span style=color:#66d9ef>get</span>; <span style=color:#66d9ef>set</span>; }
+
+    <span style=color:#66d9ef>public</span> List&lt;MyTreeNode&gt; GetChildren()
+    {
+        <span style=color:#66d9ef>if</span> (GetChildrenFunc != <span style=color:#66d9ef>null</span>)
+        {
+            <span style=color:#66d9ef>return</span> GetChildrenFunc(<span style=color:#66d9ef>this</span>);
+        }
+        <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> NotImplementedException(<span style=color:#e6db74>&#34;GetChildrenFunc&#34;</span>);
+    }
+
+    <span style=color:#75715e>#endregion
+</span><span style=color:#75715e></span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>string</span> ToString()
+    {
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;depth is {0}, content is {1}&#34;</span>, Depth.ToString(), Content.ToString());
+    }
+}
+
+<span style=color:#75715e>//未实现接口，测试编译期类型安全
+</span><span style=color:#75715e></span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MyTreeNode2</span>
+{
+
+}
+</code></pre></div><h4 id=测试代码>测试代码</h4><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cs data-lang=cs><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>TestTree</span>
+{
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> Test()
+    {
+        <span style=color:#75715e>//无GetChildrenFunc的实现时，运行时抛出NotImplementedException
+</span><span style=color:#75715e></span>        MyTreeNode.GetChildrenFunc = (node =&gt; <span style=color:#66d9ef>new</span> List&lt;MyTreeNode&gt;()
+        {
+            <span style=color:#66d9ef>new</span> MyTreeNode(node.Content*<span style=color:#ae81ff>2</span>, node.Depth + <span style=color:#ae81ff>1</span>),
+            <span style=color:#66d9ef>new</span> MyTreeNode(node.Content*<span style=color:#ae81ff>2</span> + <span style=color:#ae81ff>1</span>, node.Depth + <span style=color:#ae81ff>1</span>)
+        });
+
+
+        <span style=color:#66d9ef>var</span> tree1 = <span style=color:#66d9ef>new</span> Tree&lt;MyTreeNode&gt;() { Root = <span style=color:#66d9ef>new</span> MyTreeNode(<span style=color:#ae81ff>1</span>), MaxDepth = <span style=color:#ae81ff>3</span> };
+        tree1.Travel();
+
+        <span style=color:#75715e>//未注释时，无法通过编译
+</span><span style=color:#75715e></span>        <span style=color:#75715e>//var tree2 = new Tree&lt;MyTreeNode2&gt;();
+</span><span style=color:#75715e></span>
+    }
+}
+</code></pre></div></div></main></body></html>
