@@ -1,0 +1,433 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>port golang single flight to C# - ryji's personal blog</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="ryji"><meta name=description content="引言 GroupCache是go语言的一个开源项目，其目标提供去中心节点的P2P分布式缓存代替memcached。其中使用到的技术有：，LRU"><meta name=keywords content="ryji,code,tracing,big-data"><meta name=generator content="Hugo 0.79.1 with theme even"><link rel=canonical href=http://ryji.github.io/post/csharp_singleflight/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.2e81bbed97b8b282c1aeb57488cc71c8d8c8ec559f3931531bd396bf31e0d4dd.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="port golang single flight to C#"><meta property="og:description" content="引言 GroupCache是go语言的一个开源项目，其目标提供去中心节点的P2P分布式缓存代替memcached。其中使用到的技术有：，LRU"><meta property="og:type" content="article"><meta property="og:url" content="http://ryji.github.io/post/csharp_singleflight/"><meta property="article:published_time" content="2020-06-25T15:20:33+08:00"><meta property="article:modified_time" content="2021-03-04T17:03:21+08:00"><meta itemprop=name content="port golang single flight to C#"><meta itemprop=description content="引言 GroupCache是go语言的一个开源项目，其目标提供去中心节点的P2P分布式缓存代替memcached。其中使用到的技术有：，LRU"><meta itemprop=datePublished content="2020-06-25T15:20:33+08:00"><meta itemprop=dateModified content="2021-03-04T17:03:21+08:00"><meta itemprop=wordCount content="1446"><meta itemprop=keywords content="c#,go,groupcache,"><meta name=twitter:card content="summary"><meta name=twitter:title content="port golang single flight to C#"><meta name=twitter:description content="引言 GroupCache是go语言的一个开源项目，其目标提供去中心节点的P2P分布式缓存代替memcached。其中使用到的技术有：，LRU"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>ryji's blog</a></div><div class=mobile-navbar-icon><span></span><span></span><span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>ryji's blog</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>port golang single flight to C#</h1><div class=post-meta><span class=post-time>2020-06-25</span><div class=post-category><a href=/categories/%E7%BC%93%E5%AD%98/>缓存</a></div><span class=more-meta>约 1446 字</span>
+<span class=more-meta>预计阅读 3 分钟</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><ul><li><a href=#引言>引言</a></li><li><a href=#实现>实现</a><ul><li><a href=#实现要点>实现要点</a></li><li><a href=#代码>代码</a></li></ul></li><li><a href=#单元测试>单元测试</a><ul><li><a href=#测试要点>测试要点</a></li><li><a href=#代码-1>代码</a></li></ul></li></ul></li></ul></nav></div></div><div class=post-content><h2 id=引言>引言</h2><p>GroupCache是go语言的一个开源项目，其目标提供去中心节点的P2P分布式缓存代替memcached。其中使用到的技术有：，LRU cache，一致性哈希，并发请求压缩等。该项目已在Google的多个服务中使用。</p><p>本文使用C#实现GroupCache中用到并发请求压缩技术，并书写单元测试，验证其功能。</p><h2 id=实现>实现</h2><h3 id=实现要点>实现要点</h3><ol><li>需要记录所有执行中的请求，才能在新的请求进来时进行请求压缩，使用字典<code>_onFlight</code>记录；字典<code>_onFlight</code>存在多线程读写问题，需要使用锁来保护；</li><li>需要记录请求产生的结果和异常，才能在被阻塞的线程恢复后，将其他线程产生的结果返回到调用方。因此，在<code>OnFlightCallRes</code>添加<code>Res</code>和<code>Exception</code>字段</li><li>为了实现请求压缩，需要阻塞/恢复请求，且阻塞/恢复的单位是每一个同key的请求。使用<code>ManualResetEventSlim</code>进行线程的阻塞/恢复。因为阻塞/恢复的单元和执行结果都以key作为主键，将此变量放入<code>OnFlightCallRes</code>中</li></ol><h3 id=代码>代码</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-csharp data-lang=csharp><span class=k>public</span> <span class=k>class</span> <span class=nc>SingleFlight</span>
+<span class=p>{</span>
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// Keep Key After Execute Call
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>private</span> <span class=k>readonly</span> <span class=kt>bool</span> <span class=n>_keepKey</span><span class=p>;</span>
+
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// dic to store call result
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>private</span> <span class=k>readonly</span> <span class=n>Dictionary</span><span class=p>&lt;</span><span class=kt>string</span><span class=p>,</span> <span class=n>OnFlightCallRes</span><span class=p>&gt;</span> <span class=n>_onFlight</span><span class=p>;</span>
+
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// lock
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>private</span> <span class=k>readonly</span> <span class=n>ReaderWriterLockSlim</span> <span class=n>_lockSlim</span><span class=p>;</span>
+
+    <span class=k>public</span> <span class=n>SingleFlight</span><span class=p>(</span><span class=kt>bool</span> <span class=n>keepKey</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=n>_keepKey</span> <span class=p>=</span> <span class=n>keepKey</span><span class=p>;</span>
+        <span class=n>_onFlight</span> <span class=p>=</span> <span class=k>new</span> <span class=n>Dictionary</span><span class=p>&lt;</span><span class=kt>string</span><span class=p>,</span> <span class=n>OnFlightCallRes</span><span class=p>&gt;();</span>
+        <span class=n>_lockSlim</span> <span class=p>=</span> <span class=k>new</span> <span class=n>ReaderWriterLockSlim</span><span class=p>();</span>
+    <span class=p>}</span>
+
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// Return &lt;paramref name=&#34;callFunc&#34;/&gt; Result
+</span><span class=c1></span>    <span class=c1>/// calls from different thread with the same &lt;paramref name=&#34;key&#34;/&gt; will be compressed to one call
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=c1>/// &lt;typeparam name=&#34;T&#34;&gt;&lt;/typeparam&gt;
+</span><span class=c1></span>    <span class=c1>/// &lt;param name=&#34;key&#34;&gt;&lt;/param&gt;
+</span><span class=c1></span>    <span class=c1>/// &lt;param name=&#34;callFunc&#34;&gt;&lt;/param&gt;
+</span><span class=c1></span>    <span class=c1>/// &lt;returns&gt;&lt;/returns&gt;
+</span><span class=c1></span>    <span class=k>public</span> <span class=n>T</span> <span class=n>Call</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;(</span><span class=kt>string</span> <span class=n>key</span><span class=p>,</span> <span class=n>Func</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;</span> <span class=n>callFunc</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=n>_lockSlim</span><span class=p>.</span><span class=n>EnterWriteLock</span><span class=p>();</span>
+        <span class=k>if</span> <span class=p>(</span><span class=n>_onFlight</span><span class=p>.</span><span class=n>ContainsKey</span><span class=p>(</span><span class=n>key</span><span class=p>))</span>
+        <span class=p>{</span>
+            <span class=kt>var</span> <span class=n>callRes</span> <span class=p>=</span> <span class=n>_onFlight</span><span class=p>[</span><span class=n>key</span><span class=p>];</span>
+            <span class=n>_lockSlim</span><span class=p>.</span><span class=n>ExitWriteLock</span><span class=p>();</span>
+
+            <span class=c1>// wait on first call to finish
+</span><span class=c1></span>            <span class=n>callRes</span><span class=p>.</span><span class=n>ResetEventSlim</span><span class=p>.</span><span class=n>Wait</span><span class=p>();</span>
+            <span class=k>return</span> <span class=n>ResolveCallRes</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;(</span><span class=n>callRes</span><span class=p>);</span>
+        <span class=p>}</span>
+        <span class=k>else</span>
+        <span class=p>{</span>
+            <span class=kt>var</span> <span class=n>callRes</span> <span class=p>=</span> <span class=k>new</span> <span class=n>OnFlightCallRes</span><span class=p>()</span>
+            <span class=p>{</span>
+                <span class=n>ResetEventSlim</span> <span class=p>=</span> <span class=k>new</span> <span class=n>ManualResetEventSlim</span><span class=p>(),</span>
+            <span class=p>};</span>
+            <span class=n>_onFlight</span><span class=p>.</span><span class=n>Add</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>callRes</span><span class=p>);</span>
+            <span class=n>_lockSlim</span><span class=p>.</span><span class=n>ExitWriteLock</span><span class=p>();</span>
+            <span class=k>try</span>
+            <span class=p>{</span>
+                <span class=n>callRes</span><span class=p>.</span><span class=n>Res</span> <span class=p>=</span> <span class=n>callFunc</span><span class=p>.</span><span class=n>Invoke</span><span class=p>();</span>
+            <span class=p>}</span>
+            <span class=k>catch</span><span class=p>(</span><span class=n>Exception</span> <span class=n>ex</span><span class=p>)</span>
+            <span class=p>{</span>
+                <span class=n>callRes</span><span class=p>.</span><span class=n>Exception</span> <span class=p>=</span> <span class=n>ex</span><span class=p>;</span>
+            <span class=p>}</span>
+            <span class=c1>// stop all waiting 
+</span><span class=c1></span>            <span class=n>callRes</span><span class=p>.</span><span class=n>ResetEventSlim</span><span class=p>.</span><span class=n>Set</span><span class=p>();</span>
+
+            <span class=n>_lockSlim</span><span class=p>.</span><span class=n>EnterWriteLock</span><span class=p>();</span>
+            <span class=k>if</span> <span class=p>(!</span><span class=n>_keepKey</span><span class=p>)</span>
+            <span class=p>{</span>
+                <span class=n>_onFlight</span><span class=p>.</span><span class=n>Remove</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
+            <span class=p>}</span>
+            <span class=n>_lockSlim</span><span class=p>.</span><span class=n>ExitWriteLock</span><span class=p>();</span>
+            <span class=k>return</span> <span class=n>ResolveCallRes</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;(</span><span class=n>callRes</span><span class=p>);</span>
+        <span class=p>}</span>
+    <span class=p>}</span>
+
+    <span class=k>private</span> <span class=n>T</span> <span class=n>ResolveCallRes</span><span class=p>&lt;</span><span class=n>T</span><span class=p>&gt;(</span><span class=n>OnFlightCallRes</span> <span class=n>callRes</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=k>if</span> <span class=p>(</span><span class=n>callRes</span><span class=p>.</span><span class=n>Exception</span> <span class=p>!=</span> <span class=k>null</span><span class=p>)</span>
+        <span class=p>{</span>
+            <span class=k>throw</span> <span class=n>callRes</span><span class=p>.</span><span class=n>Exception</span><span class=p>;</span>
+        <span class=p>}</span>
+        <span class=k>return</span> <span class=p>(</span><span class=n>T</span><span class=p>)</span><span class=n>callRes</span><span class=p>.</span><span class=n>Res</span><span class=p>;</span>
+    <span class=p>}</span>
+
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// clear key if &lt;code&gt;_keepKey&lt;/code&gt; is true
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>public</span> <span class=k>void</span> <span class=n>ClearKeys</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=k>if</span> <span class=p>(!</span><span class=n>_keepKey</span><span class=p>)</span> <span class=k>return</span><span class=p>;</span>
+
+        <span class=n>_lockSlim</span><span class=p>.</span><span class=n>EnterWriteLock</span><span class=p>();</span>
+        <span class=n>_onFlight</span><span class=p>.</span><span class=n>Clear</span><span class=p>();</span>
+        <span class=n>_lockSlim</span><span class=p>.</span><span class=n>ExitWriteLock</span><span class=p>();</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+
+<span class=c1>/// &lt;summary&gt;
+</span><span class=c1>/// Call Result
+</span><span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span><span class=k>public</span> <span class=k>class</span> <span class=nc>OnFlightCallRes</span>
+<span class=p>{</span>
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// Exception When Execute Call
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>public</span> <span class=n>Exception</span> <span class=n>Exception</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
+
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// ResetEvent
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>public</span> <span class=n>ManualResetEventSlim</span> <span class=n>ResetEventSlim</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
+
+    <span class=c1>/// &lt;summary&gt;
+</span><span class=c1></span>    <span class=c1>/// Result From Call
+</span><span class=c1></span>    <span class=c1>/// &lt;/summary&gt;
+</span><span class=c1></span>    <span class=k>public</span> <span class=n>Object</span> <span class=n>Res</span> <span class=p>{</span> <span class=k>get</span><span class=p>;</span> <span class=k>set</span><span class=p>;</span> <span class=p>}</span>
+
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h2 id=单元测试>单元测试</h2><h3 id=测试要点>测试要点</h3><p>单元测试主要测试三个功能：</p><ol><li>返回值是否符合预期<code>TestReturnValue</code></li><li>异常是否正常抛出<code>TestException</code></li><li>请求压缩<ul><li><code>TestKeepKey</code>测试保留key和清理key时的特性，三次请求的实际执行次数分别是 $_upperLimit / _batchSize$、$0$、$_upperLimit / _batchSize$</li><li>TestNonKeepKey测试非保留key时的压缩特性，两次请求的实际执行次数均在区间 $[ _upperLimit / _ batchSize, _upperLimit]$</li><li><code>DoMultiCall</code>方法执行实际的请求，并返回请求次数和值。此处由于返回值数组<code>res</code>被多线程读写，需要加锁或者使用线程安全集合，这里选用线程安全集合<code>ConcurrentBag</code>来记录返回结果</li></ul></li></ol><h3 id=代码-1>代码</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span><span class=lnt>90
+</span><span class=lnt>91
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-csharp data-lang=csharp><span class=k>public</span> <span class=k>class</span> <span class=nc>SingleFlightTest</span>
+<span class=p>{</span>
+    <span class=k>private</span> <span class=kt>int</span> <span class=n>_upperLimit</span> <span class=p>=</span> <span class=m>50</span><span class=p>;</span>
+    <span class=k>private</span> <span class=kt>int</span> <span class=n>_batchSize</span> <span class=p>=</span> <span class=m>2</span><span class=p>;</span>
+<span class=na>
+</span><span class=na>    [TestMethod]</span>
+    <span class=k>public</span> <span class=k>void</span> <span class=n>TestReturnValue</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=kt>var</span> <span class=n>singleFlight</span> <span class=p>=</span> <span class=k>new</span> <span class=n>SingleFlight</span><span class=p>(</span><span class=k>false</span><span class=p>);</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>AreEqual</span><span class=p>(</span><span class=m>1</span><span class=p>,</span> <span class=n>singleFlight</span><span class=p>.</span><span class=n>Call</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;(</span><span class=s>&#34;1&#34;</span><span class=p>,</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=m>1</span><span class=p>));</span>
+    <span class=p>}</span>
+<span class=na>
+</span><span class=na>    [TestMethod]</span>
+<span class=na>    [ExpectedException(typeof(ArgumentException))]</span>
+    <span class=k>public</span> <span class=k>void</span> <span class=n>TestException</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=kt>var</span> <span class=n>singleFlight</span> <span class=p>=</span> <span class=k>new</span> <span class=n>SingleFlight</span><span class=p>(</span><span class=k>false</span><span class=p>);</span>
+        <span class=n>singleFlight</span><span class=p>.</span><span class=n>Call</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;(</span><span class=s>&#34;1&#34;</span><span class=p>,</span> <span class=p>()</span> <span class=p>=&gt;</span> <span class=k>throw</span> <span class=k>new</span> <span class=n>ArgumentException</span><span class=p>());</span>
+    <span class=p>}</span>
+<span class=na>
+</span><span class=na>    [TestMethod]</span>
+    <span class=k>public</span> <span class=k>void</span> <span class=n>TestKeepKey</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=kt>var</span> <span class=n>keepKeyFlight</span> <span class=p>=</span> <span class=k>new</span> <span class=n>SingleFlight</span><span class=p>(</span><span class=k>true</span><span class=p>);</span>
+        <span class=kt>var</span> <span class=n>multiCallRes</span> <span class=p>=</span> <span class=n>DoMultiCall</span><span class=p>(</span><span class=n>keepKeyFlight</span><span class=p>);</span>
+        <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=p>=</span> <span class=m>0</span><span class=p>;</span> <span class=n>i</span> <span class=p>&lt;</span> <span class=n>_upperLimit</span><span class=p>;</span> <span class=p>++</span><span class=n>i</span><span class=p>)</span>
+        <span class=p>{</span>
+            <span class=n>Assert</span><span class=p>.</span><span class=n>AreEqual</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item1</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>i</span> <span class=p>/</span> <span class=n>_batchSize</span><span class=p>);</span>
+        <span class=p>}</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>AreEqual</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span><span class=p>,</span> <span class=n>_upperLimit</span><span class=p>/</span><span class=n>_batchSize</span><span class=p>);</span>
+
+        <span class=c1>// call cnt is zero when not clear keys
+</span><span class=c1></span>        <span class=n>multiCallRes</span> <span class=p>=</span> <span class=n>DoMultiCall</span><span class=p>(</span><span class=n>keepKeyFlight</span><span class=p>);</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>AreEqual</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span><span class=p>,</span> <span class=m>0</span><span class=p>);</span>
+
+        <span class=n>keepKeyFlight</span><span class=p>.</span><span class=n>ClearKeys</span><span class=p>();</span>
+        <span class=n>multiCallRes</span> <span class=p>=</span> <span class=n>DoMultiCall</span><span class=p>(</span><span class=n>keepKeyFlight</span><span class=p>);</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>AreEqual</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span><span class=p>,</span> <span class=n>_upperLimit</span> <span class=p>/</span> <span class=n>_batchSize</span><span class=p>);</span>
+    <span class=p>}</span>
+<span class=na>
+</span><span class=na>    [TestMethod]</span>
+    <span class=k>public</span> <span class=k>void</span> <span class=n>TestNonKeepKey</span><span class=p>()</span>
+    <span class=p>{</span>
+        <span class=kt>var</span> <span class=n>keepKeyFlight</span> <span class=p>=</span> <span class=k>new</span> <span class=n>SingleFlight</span><span class=p>(</span><span class=k>false</span><span class=p>);</span>
+
+        <span class=kt>var</span> <span class=n>multiCallRes</span> <span class=p>=</span> <span class=n>DoMultiCall</span><span class=p>(</span><span class=n>keepKeyFlight</span><span class=p>);</span>
+
+        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=p>=</span> <span class=m>0</span><span class=p>;</span> <span class=n>i</span> <span class=p>&lt;</span> <span class=n>_upperLimit</span><span class=p>;</span> <span class=p>++</span><span class=n>i</span><span class=p>)</span>
+        <span class=p>{</span>
+            <span class=n>Assert</span><span class=p>.</span><span class=n>AreEqual</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item1</span><span class=p>[</span><span class=n>i</span><span class=p>],</span> <span class=n>i</span> <span class=p>/</span> <span class=n>_batchSize</span><span class=p>);</span>
+        <span class=p>}</span>
+
+        <span class=c1>// call cnt is in target range
+</span><span class=c1></span>        <span class=n>Assert</span><span class=p>.</span><span class=n>IsTrue</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span> <span class=p>&gt;=</span> <span class=n>_upperLimit</span> <span class=p>/</span> <span class=n>_batchSize</span><span class=p>);</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>IsTrue</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span> <span class=p>&lt;=</span> <span class=n>_upperLimit</span><span class=p>);</span>
+
+        <span class=c1>// call cnt is in target range
+</span><span class=c1></span>        <span class=n>multiCallRes</span> <span class=p>=</span> <span class=n>DoMultiCall</span><span class=p>(</span><span class=n>keepKeyFlight</span><span class=p>);</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>IsTrue</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span> <span class=p>&gt;=</span> <span class=n>_upperLimit</span><span class=p>/</span><span class=n>_batchSize</span><span class=p>);</span>
+        <span class=n>Assert</span><span class=p>.</span><span class=n>IsTrue</span><span class=p>(</span><span class=n>multiCallRes</span><span class=p>.</span><span class=n>Item2</span> <span class=p>&lt;=</span> <span class=n>_upperLimit</span><span class=p>);</span>
+    <span class=p>}</span>
+
+
+    <span class=k>private</span> <span class=n>Tuple</span><span class=p>&lt;</span><span class=n>List</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;,</span> <span class=kt>int</span><span class=p>&gt;</span> <span class=n>DoMultiCall</span><span class=p>(</span><span class=n>SingleFlight</span> <span class=n>singleFlight</span><span class=p>)</span>
+    <span class=p>{</span>
+        <span class=kt>var</span> <span class=n>tList</span> <span class=p>=</span> <span class=k>new</span> <span class=n>List</span><span class=p>&lt;</span><span class=n>Task</span><span class=p>&gt;();</span>
+        <span class=c1>// res is added in multiple thread, should use thread-safe collection
+</span><span class=c1></span>        <span class=kt>var</span> <span class=n>res</span> <span class=p>=</span> <span class=k>new</span> <span class=n>ConcurrentBag</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;();</span>
+        <span class=kt>var</span> <span class=n>callCnt</span> <span class=p>=</span> <span class=m>0</span><span class=p>;</span>
+
+        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span> <span class=p>=</span> <span class=m>0</span><span class=p>;</span> <span class=n>i</span> <span class=p>&lt;</span> <span class=n>_upperLimit</span><span class=p>;</span> <span class=p>++</span><span class=n>i</span><span class=p>)</span>
+        <span class=p>{</span>
+            <span class=kt>var</span> <span class=n>tmp</span> <span class=p>=</span> <span class=n>i</span><span class=p>;</span>
+            <span class=n>tList</span><span class=p>.</span><span class=n>Add</span><span class=p>(</span><span class=n>Task</span><span class=p>.</span><span class=n>Factory</span><span class=p>.</span><span class=n>StartNew</span><span class=p>(</span>
+                <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+                    <span class=kt>var</span> <span class=n>callRes</span> <span class=p>=</span> <span class=n>singleFlight</span><span class=p>.</span><span class=n>Call</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;((</span><span class=n>tmp</span> <span class=p>/</span> <span class=n>_batchSize</span><span class=p>).</span><span class=n>ToString</span><span class=p>(),</span> 
+                        <span class=p>()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+                            <span class=n>Thread</span><span class=p>.</span><span class=n>Sleep</span><span class=p>(</span><span class=m>50</span><span class=p>);</span>
+                            <span class=n>Interlocked</span><span class=p>.</span><span class=n>Increment</span><span class=p>(</span><span class=k>ref</span> <span class=n>callCnt</span><span class=p>);</span>
+                            <span class=k>return</span> <span class=n>tmp</span> <span class=p>/</span> <span class=n>_batchSize</span><span class=p>;</span>
+                        <span class=p>});</span>
+                    <span class=n>res</span><span class=p>.</span><span class=n>Add</span><span class=p>(</span><span class=n>callRes</span><span class=p>);</span>
+                <span class=p>}));</span>
+        <span class=p>}</span>
+
+        <span class=n>Task</span><span class=p>.</span><span class=n>WaitAll</span><span class=p>(</span><span class=n>tList</span><span class=p>.</span><span class=n>ToArray</span><span class=p>());</span>
+        <span class=kt>var</span> <span class=n>list</span> <span class=p>=</span> <span class=n>res</span><span class=p>.</span><span class=n>ToList</span><span class=p>();</span>
+        <span class=n>list</span><span class=p>.</span><span class=n>Sort</span><span class=p>();</span>
+        <span class=k>return</span> <span class=k>new</span> <span class=n>Tuple</span><span class=p>&lt;</span><span class=n>List</span><span class=p>&lt;</span><span class=kt>int</span><span class=p>&gt;,</span> <span class=kt>int</span><span class=p>&gt;(</span><span class=n>list</span><span class=p>,</span> <span class=n>callCnt</span><span class=p>);</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>ryji</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2021-03-04
+<a href=https://github.com/ryji/ryji.github.io.git/commit/201ef8da56cc6373786bfb3d4b7816aaff3ff3c0 title=ss>(201ef8d)</a></span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/c/>c#</a>
+<a href=/tags/go/>go</a>
+<a href=/tags/groupcache/>groupcache</a></div><nav class=post-nav><a class=prev href=/post/hpbn-udp/><i class="iconfont icon-left"></i><span class="prev-text nav-default">High-Performance Browser Networking 读书笔记-UDP</span>
+<span class="prev-text nav-mobile">上一篇</span></a>
+<a class=next href=/post/hpbn-tcp/><span class="next-text nav-default">High-Performance Browser Networking 读书笔记-TCP</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:ruoyangji@163.com class="iconfont icon-email" title=email></a><a href=https://github.com/ryji/ class="iconfont icon-github" title=github></a><a href=http://ryji.github.io/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动</span>
+<span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2017 -
+2021<span class=heart><i class="iconfont icon-heart"></i></span><span>ryji</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js></script><script type=text/javascript>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],}};</script><script async src=https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin=anonymous></script></body></html>
