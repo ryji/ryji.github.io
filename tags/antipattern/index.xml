@@ -8,9 +8,10 @@ Blocked Threads (阻塞的线程) 在访问处理临界区的资源(cache, resou
 处理这种问题的理想手段是使用 share-nothing 架构。然而，系统间总是需要共享部分数据。因此，在必须要共享资源时，尽可能地使用中间件进行解耦；在全局锁失效时，使用 fallback 方案进行处理(悲观锁-&amp;gt;乐观锁)
 总结
 保持沟通(商务事件) 保护共享资源 对热点数据快速重分配(热点数据自动多点备份，防止单机访问瓶颈) Scaling Effects (扩展的影响) 随着系统的横向扩展，一些在开发/测试环境中不存在的问题会逐渐在生产环境中暴露出来。
-在非生产环境或者传统架构中，P2P 通信是一种常见的策略。但随着系统进行横向扩展，这种通信方式会导致O( (N^2) )的数据流量，因此，推荐采用以下几种方式进行通信：
+在非生产环境或者传统架构中，P2P 通信是一种常见的策略。但随着系统进行横向扩展，这种通信方式会导致O((N^2))的数据流量，因此，推荐采用以下几种方式进行通信：
 UDP 广播(网络效率不高) TCP/UDP 组播 publish/subscribe 模式 消息队列 共享资源/服务，随着系统 scaling，会慢慢变成系统的瓶颈。需要尽可能减少资源的共享，做到share-nothing。
-总结</description></item><item><title>Release It 读书笔记- stability antipatterns (part1)</title><link>https://ryji.github.io/post/release_it/stability_antipattern_part1/</link><pubDate>Sun, 14 Mar 2021 19:06:02 +0800</pubDate><guid>https://ryji.github.io/post/release_it/stability_antipattern_part1/</guid><description>
+总结
+检查测试环境和生产环境的 scale 规模，确定是否会有 scaling effect 注意 P2P 通信 注意共享资源 Unbalanced Capacities (容量不平衡) 在生产环境中，访问前端服务的客户端(浏览器/App)可能数以百万计，在这种情况下，前端服务和后端服务、后端服务和后端服务之间都可能会发生负载不平衡的问题。随着系统的运行，热门和非热门的服务时刻变化，这进一步导致了不同系统之间的容量不平衡。热点事件的发生，也会加剧这种问题。</description></item><item><title>Release It 读书笔记- stability antipatterns (part1)</title><link>https://ryji.github.io/post/release_it/stability_antipattern_part1/</link><pubDate>Sun, 14 Mar 2021 19:06:02 +0800</pubDate><guid>https://ryji.github.io/post/release_it/stability_antipattern_part1/</guid><description>
 本文为 Release It! 第四章的笔记，主要介绍服务/应用设计中可能引入的反模式 (antipatterns)，这些错误的设计会导致、加速系统的崩溃。在系统设计时，应尽可能地避免这些反模式。然而，错误是不可避免的，因此，还需要进一步了解这些错误发生后，会如何影响整个系统的运行。
 Integration Points (系统集成点) 系统之间两两集成 (复杂度 ( N^2 ) ) vs 通过中间件集成 (复杂度 ( 2N ))
 TCP TCP协议具有以下特点：
