@@ -19,5 +19,5 @@ TCP协议概述 三次握手 TCP协议建立连接时需要进行三次握手，
 发送端 接收端 SYN (x=rand()) ------&amp;gt; - - &amp;lt;------ SYN ACK (x+1 y=rand()) ACK (y+1 x+1) ------&amp;gt; - 发送端在发送ACK之后就可以向接收端发送业务数据，接收端需要在接收到发送端的ACK之后才能向发送端发送业务数据。如果端到端通信的延时较大(例如：物理距离较远)，那么建立起TCP连接的耗时较长。因此，基于TCP协议的一个常用的优化方式是重用已经建立的连接。
 TFO(TCP FAST OPEN, support on Linux 3.7+ kernel)技术可以在SYN packet中发送业务数据，降低部分因三次握手导致的延时。但这种技术只可以应用在部分类型的HTTP请求中，且SYN包中携带的数据包大小也有一定的限制。
 拥塞避免和控制 flow control flow control是一种用来避免发送过多的数据导致接收端过载的机制，为了达到这一目的，通信的双方需要在每个ACK包中添加自身的recieve window(rwnd)，使得发送可以根据接收方的rwnd来调整发送速度。当rwnd降为0时，发送端停止向接收端发送数据，直到接收端将自身buffer中的数据处理完毕
-最初版本的TCP协议为rwnd分配了16bit的空间，这样限定TCP通信过程中，双方的revieve buffer不能超过$ 2^{16} = 65536 $ bytes。随着应用对数据传输能力要求越来越高，RFC 1323提出 Window Scaling 技术，在ACK packet中将rwnd左移，recieve buffer提高到1G。
+最初版本的TCP协议为rwnd分配了16bit的空间，这样限定TCP通信过程中，双方的revieve buffer不能超过( 2^{16} = 65536 ) bytes。随着应用对数据传输能力要求越来越高，RFC 1323提出 Window Scaling 技术，在ACK packet中将rwnd左移，recieve buffer提高到1G。
 slow-start flow-control解决了通信双方不会导致对方过载的问题，但实际上网络中的各个节点处理能力和带宽各有差异。在通信建立时，发送/接收双方无法了解参与通信各个节点的处理能力；随着通信的进行，网络环境发生变化，这时候也需要持续调整数据传输速率来使用网络状况。1988年，Van Jacobson 和 Michael J.</description></item></channel></rss>
